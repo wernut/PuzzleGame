@@ -3,12 +3,17 @@ package puzzle.levels;
 import java.awt.Graphics;
 
 import puzzle.Handler;
+import puzzle.entities.Player;
 
 public abstract class Level {
 
 	public static Level currentLevel = null;
 
 	protected Handler handler;
+	
+	public static int spawnX, spawnY;
+	
+	public static Player player;
 
 	public Level(Handler handler) {
 		this.handler = handler;

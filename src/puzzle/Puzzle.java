@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
+import puzzle.display.Assets;
 import puzzle.display.Display;
+import puzzle.input.KeyManager;
+import puzzle.input.MouseManager;
 import puzzle.states.GameState;
 import puzzle.states.MenuState;
 import puzzle.states.State;
@@ -12,16 +15,19 @@ import puzzle.states.State;
 public class Puzzle implements Runnable {
 
 	public int width = 700, height = 700;
-	private String title = "puzzle game v0.1";
+	public int scale = 8;
+	private String title = "Puzz Puzz";
 	private boolean running = false;
 	private Thread thread;
 	private BufferStrategy bs;
 	private Display display;
 	private Graphics g;
-	private GameState gameState;
-	private MenuState menuState;
+	public GameState gameState;
+	public MenuState menuState;
 	private Handler handler;
-	
+	private KeyManager keyManager;
+	private MouseManager mouseManager;
+
 	public Puzzle() {
 		this.start();
 	}
@@ -30,10 +36,11 @@ public class Puzzle implements Runnable {
 		Puzzle p = new Puzzle();
 	}
 
+	public static long ticks = 0;
+
 	@Override
 	public void run() {
 		init();
-		int ticks = 0;
 		int fps = 60;
 		double timePerTick = 1000000000 / fps;
 		double delta = 0;
@@ -55,7 +62,7 @@ public class Puzzle implements Runnable {
 			}
 
 			if (timer >= 1000000000) {
-				// System.out.println("FPS " + ticks);
+				System.out.println("FPS: " + ticks);
 				ticks = 0;
 				timer = 0;
 			}
@@ -68,12 +75,21 @@ public class Puzzle implements Runnable {
 	public void init() {
 		display = new Display(width, height, title);
 		handler = new Handler(this);
+		keyManager = new KeyManager();
+		mouseManager = new MouseManager();
+		display.getFrame().addKeyListener(keyManager);
+		display.getFrame().addMouseListener(mouseManager);
+		display.getFrame().addMouseMotionListener(mouseManager);
+		display.getCanvas().addMouseListener(mouseManager);
+		display.getCanvas().addMouseMotionListener(mouseManager);
+		Assets.init();
 		gameState = new GameState(handler);
 		menuState = new MenuState(handler);
-		State.setState(gameState);
+		State.setState(menuState);
 	}
 
 	public void tick() {
+		keyManager.tick();
 		if (State.getState() != null) {
 			State.getState().tick();
 		}
@@ -114,5 +130,17 @@ public class Puzzle implements Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public KeyManager getKeyManager() {
+		return this.keyManager;
+	}
+
+	public GameState getGameState() {
+		return gameState;
+	}
+
+	public MouseManager getMouseManager() {
+		return mouseManager;
 	}
 }
